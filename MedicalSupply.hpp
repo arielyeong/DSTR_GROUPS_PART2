@@ -1,72 +1,38 @@
-#include "MedicalSupply.hpp"
+// MedicalSupply.hpp
+#ifndef MEDICALSUPPLY_HPP
+#define MEDICALSUPPLY_HPP
+
 #include <iostream>
-#include <iomanip>  // For nicer output
+#include <string>
+#include <fstream>
 
 using namespace std;
 
-MedicalSupply::MedicalSupply() {
-    top = -1;  // Empty stack
-}
+struct Supply {
+    string type;
+    int quantity;
+    string batch;
+};
 
-MedicalSupply::~MedicalSupply() {
-    // Cleanup if needed (not required for array)
-}
+class MedicalSupply {
+private:
+    Supply stack[100];  // Fixed-size array for stack implementation (LIFO)
+    int top;            // Index of the top element
+    int capacity;       // Maximum capacity of the stack
+    string filename;    // Path to the data file
 
-void MedicalSupply::addSupplyStock() {
-    if (top >= 99) {
-        cout << "Stack full! Cannot add more supplies." << endl;
-        return;
-    }
-    SupplyItem item;
-    cout << "Enter supply type: ";
-    cin >> item.type;
-    cout << "Enter quantity: ";
-    cin >> item.quantity;
-    cout << "Enter batch: ";
-    cin >> item.batch;
-    stack[++top] = item;  // Push to top
-    cout << "Supply added to stock." << endl;
-}
+public:
+    MedicalSupply();  // Constructor: initializes and loads from file
+    ~MedicalSupply(); // Destructor: saves to file on exit
 
-void MedicalSupply::useLastAddedSupply() {
-    if (top < 0) {
-        cout << "No supplies available!" << endl;
-        return;
-    }
-    cout << "Using last added supply: " << stack[top].type << " (Qty: " << stack[top].quantity << ", Batch: " << stack[top].batch << ")" << endl;
-    top--;  // Pop (just decrement top)
-}
+    void menu();      // Displays the sub-menu for Medical Supply Management
+    void addSupply(); // Functionality 1: Add new supply to the top of the stack
+    void useSupply(); // Functionality 2: Remove (pop) the most recently added supply
+    void viewSupplies(); // Functionality 3: Display all supplies from bottom (oldest) to top (newest)
 
-void MedicalSupply::viewCurrentSupplies() {
-    if (top < 0) {
-        cout << "No supplies in stock." << endl;
-        return;
-    }
-    cout << "\nCurrent Supplies (LIFO order - top first):" << endl;
-    cout << left << setw(15) << "Type" << setw(10) << "Quantity" << setw(15) << "Batch" << endl;
-    cout << string(40, '-') << endl;
-    for (int i = top; i >= 0; i--) {  // Print from top to bottom
-        cout << left << setw(15) << stack[i].type << setw(10) << stack[i].quantity << setw(15) << stack[i].batch << endl;
-    }
-}
+private:
+    void saveToFile();   // Saves the current stack to the text file
+    void loadFromFile(); // Loads the stack from the text file on initialization
+};
 
-void MedicalSupply::menu() {
-    int subChoice;
-    do {
-        cout << "\n--- Medical Supply Management ---" << endl;
-        cout << "1. Add Supply Stock" << endl;
-        cout << "2. Use Last Added Supply" << endl;
-        cout << "3. View Current Supplies" << endl;
-        cout << "0. Back to Main Menu" << endl;
-        cout << "Enter choice: ";
-        cin >> subChoice;
-
-        switch (subChoice) {
-            case 1: addSupplyStock(); break;
-            case 2: useLastAddedSupply(); break;
-            case 3: viewCurrentSupplies(); break;
-            case 0: cout << "Returning to main menu..." << endl; break;
-            default: cout << "Invalid choice!" << endl;
-        }
-    } while (subChoice != 0);
-}
+#endif

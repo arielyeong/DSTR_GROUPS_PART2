@@ -1,0 +1,2 @@
+g++ main.cpp MedicalSupply.cpp PatientAdmission.cpp Emergency.cpp Ambulance.cpp -o main
+.\main.exe

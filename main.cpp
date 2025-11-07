@@ -32,16 +32,16 @@ int main() {
 
         switch (choice) {
             case 1:
-                pa.menu();
+                // pa.menu();
                 break;
             case 2:
                 ms.menu();
                 break;
             case 3:
-                ed.menu();
+                // ed.menu();
                 break;
             case 4:
-                ad.menu();
+                // ad.menu();
                 break;
             case 0:
                 cout << "Exiting program..." << endl;
