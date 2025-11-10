@@ -15,7 +15,9 @@ int main() {
     // PatientAdmission pa;
     MedicalSupply ms;
     // Emergency ed;
+
     // Ambulance ad;
+    AmbulanceQueue ad;
 
     int choice;
     do {
@@ -41,7 +43,7 @@ int main() {
                 // ed.menu();
                 break;
             case 4:
-                // ad.menu();
+                ad.menu();
                 break;
             case 0:
                 cout << "Exiting program..." << endl;
