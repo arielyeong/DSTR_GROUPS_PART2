@@ -1,38 +1,41 @@
-// MedicalSupply.hpp
 #ifndef MEDICALSUPPLY_HPP
 #define MEDICALSUPPLY_HPP
 
-#include <iostream>
 #include <string>
-#include <fstream>
 
-using namespace std;
-
-struct Supply {
-    string type;
+class SupplyItem {
+public:
+    std::string type;
     int quantity;
-    string batch;
+    std::string batch;
+    std::string expiryDate;  // Expiry date for each supply item
+    std::string remark;      // Additional remark for the supply item
+    SupplyItem* next;
+
+    SupplyItem(const std::string& type, int quantity, const std::string& batch,
+                const std::string& expiryDate, const std::string& remark)
+        : type(type), quantity(quantity), batch(batch), expiryDate(expiryDate), 
+          remark(remark), next(nullptr) {}
 };
 
 class MedicalSupply {
 private:
-    Supply stack[100];  // Fixed-size array for stack implementation (LIFO)
-    int top;            // Index of the top element
-    int capacity;       // Maximum capacity of the stack
-    string filename;    // Path to the data file
+    SupplyItem* top;  // Top of the stack
+    int itemCount;
+
+    bool isEmpty() const;  // Check if the stack is empty
+    std::string generateBatchID();  // Generate unique batch ID
 
 public:
-    MedicalSupply();  // Constructor: initializes and loads from file
-    ~MedicalSupply(); // Destructor: saves to file on exit
+    MedicalSupply();
+    ~MedicalSupply();
 
-    void menu();      // Displays the sub-menu for Medical Supply Management
-    void addSupply(); // Functionality 1: Add new supply to the top of the stack
-    void useSupply(); // Functionality 2: Remove (pop) the most recently added supply
-    void viewSupplies(); // Functionality 3: Display all supplies from bottom (oldest) to top (newest)
+    void menu();  // Display menu for medical supply management
+    void addSupplyStock();  // Add new supply to the stack
+    void useLastAddedSupply();  // Use the most recent supply (LIFO)
+    void viewCurrentSupplies();  // View the list of all supplies
 
-private:
-    void saveToFile();   // Saves the current stack to the text file
-    void loadFromFile(); // Loads the stack from the text file on initialization
+    int getItemCount() const;  // Get total number of supplies
 };
 
 #endif
