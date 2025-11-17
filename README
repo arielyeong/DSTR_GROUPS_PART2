@@ -1,5 +1,8 @@
 g++ main.cpp MedicalSupply.cpp PatientAdmission.cpp Emergency.cpp Ambulance.cpp -o main
 .\main.exe
 
-g++ main.cpp Ambulance.cpp MedicalSupply.cpp PatientAdmission.cpp Emergency.cpp -o hospital
+g++ main.cpp Ambulance.cpp MedicalSupply.cpp PatientAdmission.cpp EmergencyDepartmentMain.cpp -o hospital
+.\hospital
+
+g++ main.cpp Ambulance.cpp MedicalSupply.cpp PatientAdmission.cpp -o hospital
 .\hospital
