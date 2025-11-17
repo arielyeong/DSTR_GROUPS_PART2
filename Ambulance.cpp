@@ -97,6 +97,76 @@ void AmbulanceQueue::displaySchedule()
     cout << "========================================\n";
 }
 
+void AmbulanceQueue::updateStatus()
+{
+    if (isEmpty())
+    {
+        cout << "No ambulances available.\n";
+        return;
+    }
+
+    string targetID;
+    cout << "Enter Ambulance ID to update: ";
+    cin >> targetID;
+
+    Ambulance *temp = front;
+    bool found = false;
+
+    do
+    {
+        if (temp->id == targetID)
+        {
+            found = true;
+            cout << "Current Status: " << temp->status << endl;
+            cout << "Enter New Status (Available / OnDuty / Maintenance): ";
+            cin.ignore();
+            getline(cin, temp->status);
+            cout << "Status updated successfully!\n";
+            break;
+        }
+        temp = temp->next;
+    } while (temp != front);
+
+    if (!found)
+        cout << "Ambulance ID not found.\n";
+}
+
+void AmbulanceQueue::searchAmbulance()
+{
+    if (isEmpty())
+    {
+        cout << "No ambulances in the system.\n";
+        return;
+    }
+
+    string keyword;
+    cout << "Enter Ambulance ID to search: ";
+    cin >> keyword;
+
+    Ambulance* temp = front;
+    bool found = false;
+
+    do
+    {
+        if (temp->id == keyword)
+        {
+            found = true;
+            cout << "\nAmbulance Found:\n";
+            cout << "--------------------------------\n";
+            cout << "ID: " << temp->id << endl;
+            cout << "Driver Name: " << temp->driverName << endl;
+            cout << "Status: " << temp->status << endl;
+            cout << "--------------------------------\n";
+            break;
+        }
+        temp = temp->next;
+    } while (temp != front);
+
+    if (!found)
+        cout << "Ambulance not found.\n";
+}
+
+
 void AmbulanceQueue::menu()
 {
     int choice;
@@ -107,6 +177,8 @@ void AmbulanceQueue::menu()
         cout << "1. Register Ambulance\n";
         cout << "2. Rotate Ambulance Shift\n";
         cout << "3. Display Ambulance Schedule\n";
+        cout << "4. Update Ambulance Status\n";
+        cout << "5. Search Ambulance by ID\n";
         cout << "0. Back to Main Menu\n";
         cout << "=============================================\n";
         cout << "Enter choice: ";
@@ -124,6 +196,14 @@ void AmbulanceQueue::menu()
 
         case 3:
             displaySchedule();
+            break;
+
+        case 4:
+            updateStatus();
+            break;
+
+        case 5:
+            searchAmbulance();
             break;
 
         case 0:

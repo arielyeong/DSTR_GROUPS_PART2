@@ -29,6 +29,8 @@ public:
     void registerAmbulance(); // add ambulance
     void rotateShift();       // rotate shift
     void displaySchedule();   // display current schedule
+    void updateStatus();    // update ambulance status
+    void searchAmbulance(); // search ambulance by ID
     void menu();              // menudriven
 };
 
