@@ -365,7 +365,9 @@ public:
     if (priority >= 8) {
         cout << "\n[ALERT] CRITICAL CASE - Immediate attention required!\n";
     } else if (priority >= 5) {
-        cout << "\n[URGENT] This case requires urgent attention.\n";
+        cout << "\n[URGENT] URGENT CASE - Urgent attention needed.\n";
+    } else{
+        cout << "\n[STANDARD] STANDARD CASE - Standard case logged.\n";
     }
 }
     
@@ -430,6 +432,19 @@ public:
             cout << "\nNo cases are currently being processed.\n";
             return;
         }
+        int criticalCount = 0;     // Priority 8-10
+        int urgentCount = 0;       // Priority 5-7
+        int standardCount = 0;     // Priority 1-4
+        
+        for (int i = 0; i < processedCount; i++) {
+            if (casesBeingProcessed[i].priorityLevel >= 8) {
+                criticalCount++;
+            } else if (casesBeingProcessed[i].priorityLevel >= 5) {
+                urgentCount++;
+            } else {
+                standardCount++;
+            }
+        }
         
         cout << "\n========================================";
         cout << " CASES IN TREATMENT ";
@@ -455,6 +470,9 @@ public:
         
         cout << string(95, '=') << endl;
         cout << "Total Cases Being Processed: " << processedCount << endl;
+        cout << "Critical Cases (Priority 8-10): " << criticalCount << endl;
+        cout << "Urgent Cases (Priority 5-7): " << urgentCount << endl;
+        cout << "Standard Cases (Priority 1-4): " << standardCount << endl;
     }
     
     // View Pending Emergency Cases
@@ -483,8 +501,11 @@ public:
         cout << "Officer Name: " << officerName << endl;
         cout << "Department Code: " << departmentCode << endl;
         cout << "Active Cases: " << priorityQueue->getSize() << endl;
+        cout << "Cases Being Processed: " << processedCount << endl;
+        cout << "Total Cases in System: " << (priorityQueue->getSize() + processedCount) << endl;
         cout << "============================================\n";
     }
+    void menu();
 
 };
 

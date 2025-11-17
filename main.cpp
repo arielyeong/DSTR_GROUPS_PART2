@@ -15,7 +15,7 @@ int main() {
     PatientAdmission pa;
     MedicalSupply ms;
     ms.loadSampleData();
-    //EmergencyPriorityQueue ed;
+    EmergencyDepartmentOfficer ed("Dr. NG YIK WEI", "TP-070589"); 
     AmbulanceQueue ad;
 
     int choice;
@@ -40,7 +40,7 @@ int main() {
                 ms.menu();
                 break;
             case 3:
-                // ed.menu();
+                ed.menu();
                 break;
             case 4:
                 ad.menu();

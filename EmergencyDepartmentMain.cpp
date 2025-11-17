@@ -106,9 +106,7 @@ void generateSampleCases(EmergencyDepartmentOfficer& officer) {
 }
 
 // Main program
-int main() {
-    EmergencyDepartmentOfficer* edOfficer = new EmergencyDepartmentOfficer("Dr. NG YIK WEI", "TP-070589");
-    
+void EmergencyDepartmentOfficer::menu() {
     int choice;
     bool exitProgram = false;
     
@@ -140,49 +138,54 @@ int main() {
             case 1:
                 // Log Emergency Case
                 clearScreen();
-                edOfficer->logEmergencyCase();
+                logEmergencyCase();
                 pauseScreen();
                 break;
                 
             case 2:
                 // Process Most Critical Case
                 clearScreen();
-                edOfficer->processMostCriticalCase();
+                processMostCriticalCase();
                 pauseScreen();
                 break;
                 
             case 3:
                 // View All Pending Emergency Cases
                 clearScreen();
-                edOfficer->viewPendingEmergencyCases();
+                viewPendingEmergencyCases();
                 pauseScreen();
                 break;
-             case 4:
+                
+            case 4:
                 // View Cases Being Processed
                 clearScreen();
-                edOfficer->viewCasesBeingProcessed();
+                viewCasesBeingProcessed();
                 pauseScreen();
                 break;
+                
             case 5:
                 // Display Department Statistics
                 clearScreen();
                 cout << "\n===== DEPARTMENT STATISTICS =====\n";
-                edOfficer->viewCasesBeingProcessed();
-                edOfficer->viewPendingEmergencyCases();
+                viewCasesBeingProcessed();
+                viewPendingEmergencyCases();
                 pauseScreen();
                 break;
+                
             case 6:
                 // View Officer Information
                 clearScreen();
-                edOfficer->displayOfficerInfo();
+                displayOfficerInfo();
                 pauseScreen();
                 break;    
+                
             case 7:
                 // Generate Sample Test Cases
                 clearScreen();
-                generateSampleCases(*edOfficer);
+                generateSampleCases(*this);
                 pauseScreen();
                 break;
+                
             case 8:
                 // Clear All Cases 
                 clearScreen();
@@ -192,8 +195,18 @@ int main() {
                 char confirm;
                 cin >> confirm;
                 if (confirm == 'Y' || confirm == 'y') {
-                    delete edOfficer;
-                    edOfficer = new EmergencyDepartmentOfficer("Dr. NG YIK WEI", "TP-070589");
+                    // Reset the priority queue
+                    delete priorityQueue;
+                    priorityQueue = new EmergencyPriorityQueue(20);
+                    
+                    // Reset processed cases
+                    delete[] casesBeingProcessed;
+                    casesBeingProcessed = new EmergencyCase[maxProcessedCapacity];
+                    processedCount = 0;
+                    
+                    // Reset case ID counter
+                    nextCaseID = 1001;
+                    
                     cout << "System has been reset. All cases cleared.\n";
                 } else {
                     cout << "Operation cancelled.\n";
@@ -202,19 +215,11 @@ int main() {
                 break;
                 
             case 0:
+                // Return to main menu
                 clearScreen();
-                cout << "\n===== EXIT SYSTEM =====\n";
-                cout << "Are you sure you want to exit? (Y/N): ";
-                char exitConfirm;
-                cin >> exitConfirm;
-                if (exitConfirm == 'Y' || exitConfirm == 'y') {
-                    exitProgram = true;
-                    cout << "\nThank you for using the Emergency Department System.\n";
-                }
-                break;
-                
-            case 99:
-                clearScreen();
+                cout << "\n===== RETURNING TO MAIN MENU =====\n";
+                cout << "Returning to Hospital Management System...\n";
+                exitProgram = true;
                 pauseScreen();
                 break;
                 
@@ -224,9 +229,4 @@ int main() {
                 break;
         }
     }
-    
-    // Clean up
-    delete edOfficer;
-    
-    return 0;
 }
