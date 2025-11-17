@@ -13,7 +13,7 @@
 //   Push (Add Supply)        → O(1)
 //   Pop (Use Last Supply)    → O(1)
 //   View (Traverse Stack)    → O(n)
-//   File I/O (Save/Load)     → O(n)
+//   RemoveExpiredSupplies    → O(n)
 // ============================================================================
 
 #include "MedicalSupply.hpp"
