@@ -52,6 +52,21 @@ string MedicalSupply::generateBatchID() {
 }
 
 // ==========================================================
+// SAMPLE DATA
+// ==========================================================
+void MedicalSupply::loadSampleData() {
+    SupplyItem* expired = new SupplyItem("Old Mask", 30, generateBatchID(), "2023-01-01", "Expired item");
+    SupplyItem* s1 = new SupplyItem("Mask", 200, generateBatchID(), "2026-05-30", "N95 hospital grade");
+    SupplyItem* s2 = new SupplyItem("Gloves", 40, generateBatchID(), "2026-02-10", "Latex-free");
+    SupplyItem* s3 = new SupplyItem("Syringe", 10, generateBatchID(), "2027-01-01", "5ml sterile");
+
+    expired->next = top; top = expired; itemCount++;
+    s1->next = top; top = s1; itemCount++;
+    s2->next = top; top = s2; itemCount++;
+    s3->next = top; top = s3; itemCount++;
+}
+
+// ==========================================================
 // DATE VALIDATION — STRICT
 // ==========================================================
 bool isValidNumericDate(int y, int m, int d) {
@@ -323,17 +338,3 @@ void MedicalSupply::viewCurrentSupplies() {
     }
 }
 
-// ==========================================================
-// SAMPLE DATA
-// ==========================================================
-void MedicalSupply::loadSampleData() {
-    SupplyItem* expired = new SupplyItem("Old Mask", 30, generateBatchID(), "2023-01-01", "Expired item");
-    SupplyItem* s1 = new SupplyItem("Mask", 200, generateBatchID(), "2026-05-30", "N95 hospital grade");
-    SupplyItem* s2 = new SupplyItem("Gloves", 40, generateBatchID(), "2026-02-10", "Latex-free");
-    SupplyItem* s3 = new SupplyItem("Syringe", 10, generateBatchID(), "2027-01-01", "5ml sterile");
-
-    expired->next = top; top = expired; itemCount++;
-    s1->next = top; top = s1; itemCount++;
-    s2->next = top; top = s2; itemCount++;
-    s3->next = top; top = s3; itemCount++;
-}
