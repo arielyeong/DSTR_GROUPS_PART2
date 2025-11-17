@@ -30,7 +30,7 @@ public:
     void rotateShift();       // rotate shift
     void displaySchedule();   // display current schedule
     void updateStatus();    // update ambulance status
-    void searchAmbulance(); // search ambulance by ID
+    void searchAmbulance();
     void menu();              // menudriven
 };
 

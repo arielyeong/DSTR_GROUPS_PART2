@@ -1,4 +1,5 @@
 #include "Ambulance.hpp"
+#include <limits>
 
 AmbulanceQueue::AmbulanceQueue()
 {
@@ -31,7 +32,7 @@ void AmbulanceQueue::registerAmbulance()
 
     cout << "Enter Ambulance ID: ";
     cin >> newNode->id;
-    cin.ignore();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
     cout << "Enter Driver Name: ";
     getline(cin, newNode->driverName);
@@ -119,7 +120,7 @@ void AmbulanceQueue::updateStatus()
             found = true;
             cout << "Current Status: " << temp->status << endl;
             cout << "Enter New Status (Available / OnDuty / Maintenance): ";
-            cin.ignore();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             getline(cin, temp->status);
             cout << "Status updated successfully!\n";
             break;
@@ -143,7 +144,7 @@ void AmbulanceQueue::searchAmbulance()
     cout << "Enter Ambulance ID to search: ";
     cin >> keyword;
 
-    Ambulance* temp = front;
+    Ambulance *temp = front;
     bool found = false;
 
     do
@@ -165,7 +166,6 @@ void AmbulanceQueue::searchAmbulance()
     if (!found)
         cout << "Ambulance not found.\n";
 }
-
 
 void AmbulanceQueue::menu()
 {
