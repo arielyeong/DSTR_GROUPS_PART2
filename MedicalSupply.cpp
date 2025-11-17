@@ -2,11 +2,10 @@
 // MedicalSupply.cpp
 // Implementation for Role 2: Medical Supply Manager (STACK via Linked List)
 // ----------------------------------------------------------------------------
-// Re-Why LINKED LIST + STACK (LIFO)?
-// The linked list is used to implement the stack, ensuring dynamic memory usage 
-// and efficient operations (push and pop). Each supply item is a node with 
-// a pointer to the next node, making adding/removing items fast with no 
-// fixed size limitations like arrays.
+// Why STACK + LINKED LIST?
+// The linked list provides dynamic memory allocation with fast pointer-based
+// insert/remove operations. The stack (LIFO) ensures the latest supply batch
+// is always used first, matching real-world supply usage flow.
 //
 // ----------------------------------------------------------------------------
 // Complexity Summary:
@@ -32,9 +31,13 @@ using namespace std::chrono;
 // ==========================================================
 MedicalSupply::MedicalSupply() : top(nullptr), itemCount(0) {}
 
+// *** FIXED DESTRUCTOR — NO MORE useLastAddedSupply() CALLS ***
 MedicalSupply::~MedicalSupply() {
-    while (!isEmpty()) {
-        useLastAddedSupply();
+    SupplyItem* curr = top;
+    while (curr != nullptr) {
+        SupplyItem* next = curr->next;
+        delete curr;
+        curr = next;
     }
 }
 
@@ -46,23 +49,6 @@ string MedicalSupply::generateBatchID() {
     stringstream ss;
     ss << "BID" << num++;
     return ss.str();
-}
-
-// ==========================================================
-// SAMPLE DATA
-// ==========================================================
-void MedicalSupply::loadSampleData() {
-    // Add one expired item for demonstration:
-    SupplyItem* expired = new SupplyItem("Old Mask", 30, generateBatchID(), "2023-01-01", "Expired item");
-
-    SupplyItem* s1 = new SupplyItem("Mask", 200, generateBatchID(), "2026-05-30", "N95 hospital grade");
-    SupplyItem* s2 = new SupplyItem("Gloves", 40, generateBatchID(), "2026-02-10", "Latex-free");
-    SupplyItem* s3 = new SupplyItem("Syringe", 10, generateBatchID(), "2027-01-01", "5ml sterile");
-
-    expired->next = top; top = expired; itemCount++;
-    s1->next = top; top = s1; itemCount++;
-    s2->next = top; top = s2; itemCount++;
-    s3->next = top; top = s3; itemCount++;
 }
 
 // ==========================================================
@@ -136,7 +122,7 @@ void MedicalSupply::menu() {
         cout << " 1. Add Supply Stock\n";
         cout << " 2. Use Last Added Supply\n";
         cout << " 3. View Current Supplies\n";
-        cout << " 4. Remove Expired Supplies\n";  // <-- new option
+        cout << " 4. Remove Expired Supplies\n";
         cout << " 0. Back to Main Menu\n";
         cout << "==================================================\n";
         cout << " Enter your choice: ";
@@ -146,20 +132,18 @@ void MedicalSupply::menu() {
             case 1: addSupplyStock(); break;
             case 2: useLastAddedSupply(); break;
             case 3: viewCurrentSupplies(); break;
-            case 4: removeExpiredSupplies(); break;  // <-- new
+            case 4: removeExpiredSupplies(); break;
             case 0:
                 cout << " Returning to Main Menu...\n";
                 break;
             default:
                 cout << " Invalid choice.\n";
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
     } while (choice != 0);
 }
 
 // ==========================================================
-// ADD SUPPLY STOCK
+// ADD SUPPLY STOCK (PUSH)
 // ==========================================================
 void MedicalSupply::addSupplyStock() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -175,7 +159,7 @@ void MedicalSupply::addSupplyStock() {
     while (!(cin >> qty) || qty <= 0) {
         cin.clear();
         cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << " Invalid input! Try again: ";
+        cout << " Invalid input! Quantity must be a positive number: ";
     }
 
     cin.ignore();
@@ -207,7 +191,7 @@ void MedicalSupply::addSupplyStock() {
 }
 
 // ==========================================================
-// USE LAST ADDED SUPPLY
+// USE LAST ADDED SUPPLY (POP)
 // ==========================================================
 void MedicalSupply::useLastAddedSupply() {
     if (isEmpty()) {
@@ -222,7 +206,7 @@ void MedicalSupply::useLastAddedSupply() {
     cout << " Qty in Stock: " << item->quantity << "\n";
     cout << " Batch ID    : " << item->batch << "\n";
     cout << " Expiry Date : " << item->expiryDate << "\n";
-    cout << "\n===============================================\n";
+    cout << "===============================================\n";
 
     int useQty;
     cout << " Enter quantity to use: ";
@@ -246,20 +230,19 @@ void MedicalSupply::useLastAddedSupply() {
     cout << "=========================================\n";
 
     if (item->quantity == 0) {
-    cout << "\n----------------------------------------------\n";
-    cout << " The supply '" << item->type << "' (Batch " << item->batch 
-         << ") has been completely used.\n";
-    cout << " It is now removed from the storage stack.\n";
-    cout << "----------------------------------------------\n";
+        cout << "\n----------------------------------------------\n";
+        cout << " The supply '" << item->type << "' (Batch " << item->batch 
+             << ") has been completely used and removed from storage.\n";
+        cout << "----------------------------------------------\n";
 
-    top = top->next;
-    delete item;
-    itemCount--;
-}
+        top = top->next;
+        delete item;
+        itemCount--;
+    }
 }
 
 // ==========================================================
-// REMOVE EXPIRED SUPPLIES
+// REMOVE EXPIRED SUPPLIES (LINKED LIST TRAVERSAL)
 // ==========================================================
 void MedicalSupply::removeExpiredSupplies() {
     if (isEmpty()) {
@@ -275,8 +258,9 @@ void MedicalSupply::removeExpiredSupplies() {
 
     while (curr != nullptr) {
         if (isDateExpired(curr->expiryDate)) {
-            cout << " [REMOVED] " << curr->type << " (Batch " << curr->batch 
-                 << ") Expired on " << curr->expiryDate << "\n";
+            cout << " [REMOVED] " << curr->type 
+                 << " (Batch " << curr->batch << ") — Expired on " 
+                 << curr->expiryDate << "\n";
 
             removedCount++;
 
@@ -308,7 +292,7 @@ void MedicalSupply::removeExpiredSupplies() {
 }
 
 // ==========================================================
-// VIEW CURRENT SUPPLIES
+// VIEW CURRENT SUPPLIES (TRAVERSE STACK)
 // ==========================================================
 void MedicalSupply::viewCurrentSupplies() {
     if (isEmpty()) {
@@ -337,4 +321,19 @@ void MedicalSupply::viewCurrentSupplies() {
         cur = cur->next;
         num++;
     }
+}
+
+// ==========================================================
+// SAMPLE DATA
+// ==========================================================
+void MedicalSupply::loadSampleData() {
+    SupplyItem* expired = new SupplyItem("Old Mask", 30, generateBatchID(), "2023-01-01", "Expired item");
+    SupplyItem* s1 = new SupplyItem("Mask", 200, generateBatchID(), "2026-05-30", "N95 hospital grade");
+    SupplyItem* s2 = new SupplyItem("Gloves", 40, generateBatchID(), "2026-02-10", "Latex-free");
+    SupplyItem* s3 = new SupplyItem("Syringe", 10, generateBatchID(), "2027-01-01", "5ml sterile");
+
+    expired->next = top; top = expired; itemCount++;
+    s1->next = top; top = s1; itemCount++;
+    s2->next = top; top = s2; itemCount++;
+    s3->next = top; top = s3; itemCount++;
 }
