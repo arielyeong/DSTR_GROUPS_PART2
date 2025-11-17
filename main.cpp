@@ -21,6 +21,7 @@ int main() {
     int choice;
     do
     {
+        cout << endl;
         cout << "=========================================" << endl;
         cout << "HOSPITAL PATIENT CARE MANAGEMENT SYSTEM" << endl;
         cout << "=========================================" << endl;
@@ -47,6 +48,7 @@ int main() {
                 break;
             case 0:
                 cout << "Exiting program..." << endl;
+                cout << endl;
                 break;
             default:
                 cout << "Invalid choice. Please try again." << endl;
