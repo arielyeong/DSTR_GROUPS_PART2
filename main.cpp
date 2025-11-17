@@ -12,7 +12,7 @@ class Ambulance;
 class PatientAdmission;
 
 int main() {
-    // PatientAdmission pa;
+    PatientAdmission pa;
     MedicalSupply ms;
     ms.loadSampleData(); 
     // Emergency ed;
@@ -35,7 +35,7 @@ int main() {
 
         switch (choice) {
             case 1:
-                // pa.menu();
+                pa.menu();
                 break;
             case 2:
                 ms.menu();
