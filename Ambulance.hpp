@@ -11,19 +11,20 @@ struct Ambulance
     int id;
     std::string driverName;
     std::string status;
+    Ambulance* next;
 };
 
 // Circular Queue class
 class AmbulanceQueue
 {
 private:
-    static const int MAX = 10; // arrange the number of ambulance (max=10)
-    Ambulance queue[MAX];
-    int front, rear, count; //shows the start, end. current ambulance how many
+    Ambulance* front;
+    Ambulance* rear;
 
 public:
     AmbulanceQueue(); // constructor
-    bool isFull();
+    ~AmbulanceQueue(); // destructor
+
     bool isEmpty();
     void registerAmbulance(); // add ambulance
     void rotateShift();       // rotate shift

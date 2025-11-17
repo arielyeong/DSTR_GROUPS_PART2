@@ -2,93 +2,70 @@
 
 AmbulanceQueue::AmbulanceQueue()
 {
-    front = 0;
-    rear = -1;
-    count = 0;
+    front = nullptr;
+    rear = nullptr;
 }
 
-// Ambulance menu (3 function)
-void AmbulanceQueue::menu()
+AmbulanceQueue::~AmbulanceQueue()
 {
-    int choice;
+    if (front == nullptr)
+        return;
+
+    Ambulance *temp = front;
     do
     {
-        cout << "\n========== Ambulance Dispatch Menu ==========" << endl;
-        cout << "1. Register Ambulance" << endl;
-        cout << "2. Rotate Ambulance Shift" << endl;
-        cout << "3. Display Ambulance Schedule" << endl;
-        cout << "0. Back to Main Menu\n"
-             << endl;
-        cout << "=============================================" << endl;
-        cout << "Enter choice: ";
-        cin >> choice;
-
-        switch (choice)
-        {
-        case 1:
-            registerAmbulance();
-            break;
-        case 2:
-            rotateShift();
-            break;
-        case 3:
-            displaySchedule();
-            break;
-        case 0:
-            cout << "Returning to Main Menu..." << endl;
-            break;
-        default:
-            cout << "Invalid choice. Please try again." << endl;
-        }
-    } while (choice != 0);
-}
-
-bool AmbulanceQueue::isFull()
-{
-    return count == MAX;
+        Ambulance *del = temp;
+        temp = temp->next;
+        delete del;
+    } while (temp != front);
 }
 
 bool AmbulanceQueue::isEmpty()
 {
-    return count == 0;
+    return front == nullptr;
 }
 
 void AmbulanceQueue::registerAmbulance()
 {
-    if (isFull())
+    Ambulance *newNode = new Ambulance;
+
+    cout << "Enter Ambulance ID: ";
+    cin >> newNode->id;
+    cin.ignore();
+
+    cout << "Enter Driver Name: ";
+    getline(cin, newNode->driverName);
+
+    newNode->status = "Available";
+    newNode->next = nullptr;
+
+    // first ambulance
+    if (isEmpty())
     {
-        cout << "Ambulance queue is full. Cannot register more ambulances." << endl;
-        return;
+        front = rear = newNode;
+        rear->next = front; // make circular
+    }
+    else
+    {
+        rear->next = newNode;
+        rear = newNode;
+        rear->next = front;
     }
 
-    Ambulance newAmbulance;
-    cout << "Enter Ambulance ID: ";
-    cin >> newAmbulance.id;
-    cout << "Enter Driver Name: ";
-    cin.ignore();
-    getline(cin, newAmbulance.driverName);
-    newAmbulance.status = "Available";
-
-    rear = (rear + 1) % MAX;
-    queue[rear] = newAmbulance;
-    count++;
-
-    cout << "Ambulance registered successfully!" << endl;
+    cout << "Ambulance registered successfully!\n";
 }
 
 void AmbulanceQueue::rotateShift()
 {
     if (isEmpty())
     {
-        cout << "No ambulances to rotate." << endl;
+        cout << "No ambulances to rotate.\n";
         return;
     }
 
-    // move the front ambulance to the end of the queue
-    Ambulance temp = queue[front];
-    front = (front + 1) % MAX;
-    rear = (rear + 1) % MAX;
-    queue[rear] = temp;
+    // Moving front ambulance to the back in circular list
+    front = front->next;
+    rear = rear->next;
 
     cout << "Ambulance shift rotated successfully!\n";
 }
@@ -97,20 +74,65 @@ void AmbulanceQueue::displaySchedule()
 {
     if (isEmpty())
     {
-        cout << "No ambulances in the schedule." << endl;
+        cout << "No ambulances in the schedule.\n";
         return;
     }
 
-    cout << "\nCurrent Ambulance Schedule:" << endl;
-    cout << "========================================" << endl;
-    cout << "ID\tDriver Name\tStatus" << endl;
-    cout << "========================================" << endl;
+    cout << "\nCurrent Ambulance Schedule:\n";
+    cout << "========================================\n";
+    cout << "ID\tDriver Name\tStatus\n";
+    cout << "========================================\n";
 
-    for (int i = 0; i < count; i++)
+    Ambulance *temp = front;
+
+    do
     {
-        int index = (front + i) % MAX;
-        cout << queue[index].id << "\t" << queue[index].driverName
-             << "\t\t" << queue[index].status << endl;
-    }
-    cout << "========================================" << endl;
+        cout << temp->id << "\t" << temp->driverName
+             << "\t\t" << temp->status << endl;
+
+        temp = temp->next;
+
+    } while (temp != front);
+
+    cout << "========================================\n";
+}
+
+void AmbulanceQueue::menu()
+{
+    int choice;
+
+    do
+    {
+        cout << "\n========== Ambulance Dispatch Menu ==========\n";
+        cout << "1. Register Ambulance\n";
+        cout << "2. Rotate Ambulance Shift\n";
+        cout << "3. Display Ambulance Schedule\n";
+        cout << "0. Back to Main Menu\n";
+        cout << "=============================================\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        switch (choice)
+        {
+        case 1:
+            registerAmbulance();
+            break;
+
+        case 2:
+            rotateShift();
+            break;
+
+        case 3:
+            displaySchedule();
+            break;
+
+        case 0:
+            cout << "Returning to Main Menu...\n";
+            break;
+
+        default:
+            cout << "Invalid choice!\n";
+        }
+
+    } while (choice != 0);
 }
