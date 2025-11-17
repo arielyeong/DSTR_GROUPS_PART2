@@ -8,7 +8,7 @@ using namespace std;
 // ambulance struct
 struct Ambulance
 {
-    int id;
+    string id; //make it string to accommodate alphanumeric IDs
     std::string driverName;
     std::string status;
     Ambulance* next;

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "PatientAdmission.hpp"
 #include "MedicalSupply.hpp"
-#include "Emergency.hpp"
+#include "EmergencyDepartment.hpp"
 #include "Ambulance.hpp"
 
 using namespace std;
@@ -14,14 +14,13 @@ class PatientAdmission;
 int main() {
     PatientAdmission pa;
     MedicalSupply ms;
-    ms.loadSampleData(); 
-    // Emergency ed;
-
-    // Ambulance ad;
+    ms.loadSampleData();
+    //EmergencyPriorityQueue ed;
     AmbulanceQueue ad;
 
     int choice;
-    do {
+    do
+    {
         cout << "=========================================" << endl;
         cout << "HOSPITAL PATIENT CARE MANAGEMENT SYSTEM" << endl;
         cout << "=========================================" << endl;
