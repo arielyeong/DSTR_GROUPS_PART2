@@ -1,41 +1,52 @@
 #ifndef MEDICALSUPPLY_HPP
 #define MEDICALSUPPLY_HPP
 
+#include <iostream>
 #include <string>
+using namespace std;
 
-class SupplyItem {
-public:
-    std::string type;
+// ======================================
+// Supply Item (Node for Stack via Linked List)
+// ======================================
+struct SupplyItem {
+    string type;
     int quantity;
-    std::string batch;
-    std::string expiryDate;  // Expiry date for each supply item
-    std::string remark;      // Additional remark for the supply item
+    string batch;
+    string expiryDate;
+    string remark;
     SupplyItem* next;
 
-    SupplyItem(const std::string& type, int quantity, const std::string& batch,
-                const std::string& expiryDate, const std::string& remark)
-        : type(type), quantity(quantity), batch(batch), expiryDate(expiryDate), 
-          remark(remark), next(nullptr) {}
+    SupplyItem(string t, int q, string b, string e, string r)
+        : type(t), quantity(q), batch(b), expiryDate(e), remark(r), next(nullptr) {}
 };
 
+// ======================================
+// Medical Supply Manager (STACK - LIFO)
+// ======================================
 class MedicalSupply {
 private:
-    SupplyItem* top;  // Top of the stack
+    SupplyItem* top;
     int itemCount;
-
-    bool isEmpty() const;  // Check if the stack is empty
-    std::string generateBatchID();  // Generate unique batch ID
 
 public:
     MedicalSupply();
     ~MedicalSupply();
 
-    void menu();  // Display menu for medical supply management
-    void addSupplyStock();  // Add new supply to the stack
-    void useLastAddedSupply();  // Use the most recent supply (LIFO)
-    void viewCurrentSupplies();  // View the list of all supplies
+    // Core operations
+    void menu();
+    void addSupplyStock();
+    void useLastAddedSupply();
+    void viewCurrentSupplies();
+    void removeExpiredSupplies();
 
-    int getItemCount() const;  // Get total number of supplies
+    // Helpers
+    string generateBatchID();
+    bool isEmpty() const;
+    int getItemCount() const;
+
+    // Sample data loader
+    void loadSampleData();
 };
 
 #endif
+

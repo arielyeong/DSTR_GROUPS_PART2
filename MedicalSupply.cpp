@@ -27,6 +27,9 @@
 using namespace std;
 using namespace std::chrono;
 
+// ==========================================================
+// Constructor & Destructor
+// ==========================================================
 MedicalSupply::MedicalSupply() : top(nullptr), itemCount(0) {}
 
 MedicalSupply::~MedicalSupply() {
@@ -35,14 +38,66 @@ MedicalSupply::~MedicalSupply() {
     }
 }
 
+// ==========================================================
+// Batch ID Generator (BID1, BID2...)
+// ==========================================================
 string MedicalSupply::generateBatchID() {
-    // Manually set batch ID to "BID1" and increment yourself
-    static int batchNumber = 1;
-    stringstream batchID;
-    batchID << "BID" << batchNumber++;
-    return batchID.str();
+    static int num = 1;
+    stringstream ss;
+    ss << "BID" << num++;
+    return ss.str();
 }
 
+// ==========================================================
+// DATE VALIDATION — STRICT
+// ==========================================================
+bool isValidNumericDate(int y, int m, int d) {
+    if (m < 1 || m > 12) return false;
+    if (d < 1) return false;
+
+    int daysInMonth[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+
+    bool leap = (y % 4 == 0 && y % 100 != 0) || (y % 400 == 0);
+    if (leap) daysInMonth[1] = 29;
+
+    return d <= daysInMonth[m - 1];
+}
+
+bool isValidDateStrict(const string& date) {
+    if (!regex_match(date, regex(R"(\d{4}-\d{2}-\d{2})"))) return false;
+
+    int y, m, d;
+    sscanf(date.c_str(), "%d-%d-%d", &y, &m, &d);
+
+    return isValidNumericDate(y, m, d);
+}
+
+bool isDateExpired(const string& date) {
+    int y, m, d;
+    sscanf(date.c_str(), "%d-%d-%d", &y, &m, &d);
+
+    auto now = system_clock::now();
+    time_t tt = system_clock::to_time_t(now);
+    tm* t = localtime(&tt);
+
+    int cy = t->tm_year + 1900;
+    int cm = t->tm_mon + 1;
+    int cd = t->tm_mday;
+
+    if (y < cy) return true;
+    if (y == cy && m < cm) return true;
+    if (y == cy && m == cm && d < cd) return true;
+
+    return false;
+}
+
+bool isDateInFutureStrict(const string& date) {
+    return !isDateExpired(date);
+}
+
+// ==========================================================
+// Stack Checks
+// ==========================================================
 bool MedicalSupply::isEmpty() const {
     return top == nullptr;
 }
@@ -51,186 +106,235 @@ int MedicalSupply::getItemCount() const {
     return itemCount;
 }
 
-bool isValidDate(const string& date) {
-    // Validate date format as YYYY-MM-DD using regular expression
-    regex datePattern(R"(\d{4}-\d{2}-\d{2})");
-    return regex_match(date, datePattern);
-}
-
-// Function to compare the input date with the current date
-bool isDateInFuture(const string& date) {
-    // Split the input date into year, month, and day
-    int year, month, day;
-    sscanf(date.c_str(), "%d-%d-%d", &year, &month, &day);
-
-    // Get the current date using std::chrono
-    auto today = system_clock::now();
-    time_t today_time = system_clock::to_time_t(today);
-    struct tm *local_time = localtime(&today_time);
-
-    // Compare the input date with today's date
-    if (year < (1900 + local_time->tm_year)) {
-        return false;  // The input year is in the past
-    } else if (year == (1900 + local_time->tm_year)) {
-        if (month < (local_time->tm_mon + 1)) {
-            return false;  // The input month is in the past (same year)
-        } else if (month == (local_time->tm_mon + 1)) {
-            if (day <= local_time->tm_mday) {
-                return false;  // The input day is today or in the past
-            }
-        }
-    }
-
-    return true;  // The date is in the future
-}
-
+// ==========================================================
+// MENU
+// ==========================================================
 void MedicalSupply::menu() {
     int choice;
+
     do {
-        cout << "\n--- Medical Supply Management (Role 2) ---" << endl;
-        cout << "1. Add Supply Stock" << endl;
-        cout << "2. Use 'Last Added' Supply" << endl;
-        cout << "3. View Current Supplies" << endl;
-        cout << "0. Back to Main Menu" << endl;
-        cout << "Enter your choice: ";
+        cout << "\n==================================================\n";
+        cout << "           MEDICAL SUPPLY MANAGEMENT (ROLE 2)      \n";
+        cout << "==================================================\n";
+        cout << " 1. Add Supply Stock\n";
+        cout << " 2. Use Last Added Supply\n";
+        cout << " 3. View Current Supplies\n";
+        cout << " 4. Remove Expired Supplies\n";  // <-- new option
+        cout << " 0. Back to Main Menu\n";
+        cout << "==================================================\n";
+        cout << " Enter your choice: ";
         cin >> choice;
 
         switch (choice) {
-            case 1:
-                addSupplyStock();
-                break;
-            case 2:
-                useLastAddedSupply();
-                break;
-            case 3:
-                viewCurrentSupplies();
-                break;
+            case 1: addSupplyStock(); break;
+            case 2: useLastAddedSupply(); break;
+            case 3: viewCurrentSupplies(); break;
+            case 4: removeExpiredSupplies(); break;  // <-- new
             case 0:
-                cout << "Returning to Main Menu..." << endl;
+                cout << " Returning to Main Menu...\n";
                 break;
             default:
-                cout << "Invalid choice. Please try again." << endl;
+                cout << " Invalid choice.\n";
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
     } while (choice != 0);
 }
 
+// ==========================================================
+// ADD SUPPLY STOCK
+// ==========================================================
 void MedicalSupply::addSupplyStock() {
-    string type, expiryDate, remark;
-    int quantity;
-
-    cout << "\n--- Add Supply Stock ---" << endl;
-
-    // Clear input buffer
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    cout << "Enter supply type (e.g., Mask, Gloves, Syringe, Medicine): ";
+    string type, expiry, remark;
+    int qty;
+
+    cout << "\n============ ADD SUPPLY STOCK ============\n";
+    cout << " Enter supply type: ";
     getline(cin, type);
 
-    cout << "Enter quantity: ";
-    cin >> quantity;
-
-    // Validate quantity
-    while (quantity <= 0) {
-        cout << "Quantity must be positive. Please enter a valid quantity: ";
-        cin >> quantity;
+    cout << " Enter quantity: ";
+    while (!(cin >> qty) || qty <= 0) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << " Invalid input! Try again: ";
     }
 
-    // Generate unique batch ID automatically (using BID1, BID2, etc.)
-    string batch = generateBatchID();
-
-    // Get expiry date and validate
-    cout << "Enter expiry date (YYYY-MM-DD): ";
     cin.ignore();
-    getline(cin, expiryDate);
+    cout << " Enter expiry date (YYYY-MM-DD): ";
+    getline(cin, expiry);
 
-    // Date validation
-    while (!isValidDate(expiryDate) || !isDateInFuture(expiryDate)) {
-        cout << "Invalid or past expiry date. Please enter a valid future expiry date (YYYY-MM-DD): ";
-        getline(cin, expiryDate);
+    while (!isValidDateStrict(expiry) || !isDateInFutureStrict(expiry)) {
+        cout << " Invalid or past date. Enter valid future date (YYYY-MM-DD): ";
+        getline(cin, expiry);
     }
 
-    // Get remark
-    cout << "Enter any remarks (optional): ";
+    cout << " Enter remarks (optional): ";
     getline(cin, remark);
 
-    // Create new supply item
-    SupplyItem* newItem = new SupplyItem(type, quantity, batch, expiryDate, remark);
+    string batchID = generateBatchID();
+    SupplyItem* n = new SupplyItem(type, qty, batchID, expiry, remark);
 
-    // Push to stack (LIFO - Last In First Out)
-    newItem->next = top;
-    top = newItem;
+    n->next = top;
+    top = n;
     itemCount++;
 
-    cout << "✓ Supply stock added successfully!" << endl;
-    cout << "Added: " << quantity << " " << type << " (Batch: " << batch 
-         << ", Expiry Date: " << expiryDate << ", Remark: " << remark << ")" << endl;
-    cout << "Total supply items in storage: " << itemCount << endl;
+    cout << "\n========== SUPPLY ADD TICKET ==========\n";
+    cout << " Type        : " << type << "\n";
+    cout << " Quantity    : " << qty << "\n";
+    cout << " Batch ID    : " << batchID << "\n";
+    cout << " Expiry Date : " << expiry << "\n";
+    cout << " Remark      : " << remark << "\n";
+    cout << "=======================================\n";
 }
 
+// ==========================================================
+// USE LAST ADDED SUPPLY
+// ==========================================================
 void MedicalSupply::useLastAddedSupply() {
     if (isEmpty()) {
-        cout << "\nNo supplies available to use! Storage is empty." << endl;
+        cout << "\n No supplies available!\n";
         return;
     }
 
-    cout << "\n--- Using Last Added Supply ---" << endl;
+    SupplyItem* item = top;
 
-    // Get the top item (last added)
-    SupplyItem* itemToUse = top;
+    cout << "\n============ USE LAST ADDED SUPPLY ============\n";
+    cout << " Type        : " << item->type << "\n";
+    cout << " Qty in Stock: " << item->quantity << "\n";
+    cout << " Batch ID    : " << item->batch << "\n";
+    cout << " Expiry Date : " << item->expiryDate << "\n";
+    cout << "\n===============================================\n";
 
-    int useQuantity;
-    cout << "Using: " << itemToUse->quantity << " " << itemToUse->type 
-         << " (Batch: " << itemToUse->batch << ", Expiry Date: " << itemToUse->expiryDate 
-         << ", Remark: " << itemToUse->remark << ")" << endl;
+    int useQty;
+    cout << " Enter quantity to use: ";
+    while (!(cin >> useQty) || useQty <= 0) {
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout << " Invalid input! Enter a number: ";
+    }
 
-    cout << "Enter quantity to use: ";
-    cin >> useQuantity;
-
-    // Validate quantity
-    if (useQuantity <= 0 || useQuantity > itemToUse->quantity) {
-        cout << "Invalid quantity. Please enter a value between 1 and " << itemToUse->quantity << endl;
+    if (useQty > item->quantity) {
+        cout << " Not enough quantity! Maximum available: " << item->quantity << "\n";
         return;
     }
 
-    // Subtract the used quantity
-    itemToUse->quantity -= useQuantity;
+    item->quantity -= useQty;
 
-    // If the quantity is now zero, pop the item from the stack
-    if (itemToUse->quantity == 0) {
-        top = top->next;
-        delete itemToUse;
-        itemCount--;
-    }
+    cout << "\n========== SUPPLY USAGE TICKET ==========\n";
+    cout << " Used Quantity : " << useQty << "\n";
+    cout << " Batch ID      : " << item->batch << "\n";
+    cout << " Type          : " << item->type << "\n";
+    cout << "=========================================\n";
 
-    cout << "Supply used successfully!" << endl;
-    cout << "Remaining supply items in storage: " << itemCount << endl;
+    if (item->quantity == 0) {
+    cout << "\n----------------------------------------------\n";
+    cout << " The supply '" << item->type << "' (Batch " << item->batch 
+         << ") has been completely used.\n";
+    cout << " It is now removed from the storage stack.\n";
+    cout << "----------------------------------------------\n";
+
+    top = top->next;
+    delete item;
+    itemCount--;
+}
 }
 
+// ==========================================================
+// REMOVE EXPIRED SUPPLIES
+// ==========================================================
+void MedicalSupply::removeExpiredSupplies() {
+    if (isEmpty()) {
+        cout << "\n No supplies to check.\n";
+        return;
+    }
+
+    cout << "\n============ REMOVE EXPIRED SUPPLIES ============\n";
+
+    SupplyItem* curr = top;
+    SupplyItem* prev = nullptr;
+    int removedCount = 0;
+
+    while (curr != nullptr) {
+        if (isDateExpired(curr->expiryDate)) {
+            cout << " [REMOVED] " << curr->type << " (Batch " << curr->batch 
+                 << ") Expired on " << curr->expiryDate << "\n";
+
+            removedCount++;
+
+            if (curr == top) {
+                top = curr->next;
+                delete curr;
+                curr = top;
+            } else {
+                prev->next = curr->next;
+                delete curr;
+                curr = prev->next;
+            }
+
+            itemCount--;
+        } 
+        else {
+            prev = curr;
+            curr = curr->next;
+        }
+    }
+
+    if (removedCount == 0) {
+        cout << " No expired supplies found.\n";
+    } else {
+        cout << "----------------------------------------------\n";
+        cout << " Total expired supplies removed: " << removedCount << "\n";
+        cout << "----------------------------------------------\n";
+    }
+}
+
+// ==========================================================
+// VIEW CURRENT SUPPLIES
+// ==========================================================
 void MedicalSupply::viewCurrentSupplies() {
     if (isEmpty()) {
-        cout << "\nStorage is empty. No supplies available." << endl;
+        cout << "\n==================================================\n";
+        cout << "           CURRENT SUPPLIES (EMPTY)                \n";
+        cout << "==================================================\n";
         return;
     }
 
-    cout << "\n--- Current Supplies (Last Added First) ---" << endl;
-    cout << "Total items: " << itemCount << endl;
-    cout << "----------------------------------------" << endl;
+    cout << "\n==================================================\n";
+    cout << "           CURRENT SUPPLIES (LAST ADDED FIRST)     \n";
+    cout << "==================================================\n";
 
-    SupplyItem* current = top;
-    int position = 1;
+    SupplyItem* cur = top;
+    int num = 1;
 
-    while (current != nullptr) {
-        cout << position << ". Type: " << current->type << endl;
-        cout << "   Quantity: " << current->quantity << endl;
-        cout << "   Batch: " << current->batch << endl;
-        cout << "   Expiry Date: " << current->expiryDate << endl;
-        cout << "   Remark: " << (current->remark.empty() ? "No remarks" : current->remark) << endl;
-        cout << "   ---" << endl;
+    while (cur != nullptr) {
+        cout << "\n--------------- TICKET #" << num << " -----------------\n";
+        cout << " Type        : " << cur->type << "\n";
+        cout << " Quantity    : " << cur->quantity << "\n";
+        cout << " Batch ID    : " << cur->batch << "\n";
+        cout << " Expiry Date : " << cur->expiryDate << "\n";
+        cout << " Remark      : " << (cur->remark.empty() ? "None" : cur->remark) << "\n";
+        cout << "----------------------------------------------\n";
 
-        current = current->next;
-        position++;
+        cur = cur->next;
+        num++;
     }
 }
 
+// ==========================================================
+// SAMPLE DATA
+// ==========================================================
+void MedicalSupply::loadSampleData() {
+    // Add one expired item for demonstration:
+    SupplyItem* expired = new SupplyItem("Old Mask", 30, generateBatchID(), "2023-01-01", "Expired item");
+
+    SupplyItem* s1 = new SupplyItem("Mask", 200, generateBatchID(), "2026-05-30", "N95 hospital grade");
+    SupplyItem* s2 = new SupplyItem("Gloves", 40, generateBatchID(), "2026-02-10", "Latex-free");
+    SupplyItem* s3 = new SupplyItem("Syringe", 10, generateBatchID(), "2027-01-01", "5ml sterile");
+
+    expired->next = top; top = expired; itemCount++;
+    s1->next = top; top = s1; itemCount++;
+    s2->next = top; top = s2; itemCount++;
+    s3->next = top; top = s3; itemCount++;
+}

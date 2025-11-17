@@ -14,6 +14,7 @@ class PatientAdmission;
 int main() {
     // PatientAdmission pa;
     MedicalSupply ms;
+    ms.loadSampleData(); 
     // Emergency ed;
 
     // Ambulance ad;
